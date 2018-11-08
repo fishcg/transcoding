@@ -104,7 +104,9 @@ candidates.__proto__.topSound = async function (id) {
 
 module.exports = candidates;
 // @WORKAROUND 监控代码
+/*
 setInterval(() => {
     console.log(candidates);
     console.log("\n\n");
 }, 5000)
+*/
