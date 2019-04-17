@@ -8,9 +8,9 @@ const logger = require("../lib/Logger");
 const oss = require("../component/OSS");
 const ffmpeg = require("../component/FFmpeg");
 const task_list = require("../component/TaskList");
-const { banVip, transcodingRecipient } = require('../config/backend');
+const { transcodingRecipient } = require('../config/backend');
 const Email = require("../component/Email");
-
+const { sendQQMessage } = require('../lib/Utils');
 
 class Sound {    
     constructor({id, user_id, duration, soundurl, checked}) {
@@ -43,8 +43,9 @@ class Sound {
         if (!checked) {
             let user_sql = `SELECT confirm FROM mowangskuser where id = ${this.user_id}`;
             let user = await conn.findOne(user_sql);
-            if (user.confirm & (1 << 5) && -1 === R.indexOf(parseInt(this.user_id), banVip)) {
-                // 若为特殊金 V 用户，则转码后直接过审
+            if (user.confirm & 16) {
+                // 若为自动过审用户，则 confirm 字段值比特位第 5 位为 1
+                // 参考文档：https://github.com/MiaoSiLa/missevan-doc/blob/master/product/%E7%94%A8%E6%88%B7_confirm_%E5%AD%97%E6%AE%B5%E5%80%BC%E7%BA%A6%E5%AE%9A.md
                 checked = 1;
                 let soundnum_sql = `UPDATE mowangskuser SET soundnumchecked = soundnumchecked +1 WHERE id = ${this.user_id}`;
                 await conn.execute(soundnum_sql);
@@ -89,6 +90,8 @@ class Sound {
             let content = `<b style="color: #6c9e71">[时间]</b></br>${new Date()}</br>
                  <b style="color: #9e534b">[错误信息]</b></br>${error_info}</br>`
             await email.send(subject, content)
+            // 发送到 QQ 消息通知
+            sendQQMessage(`音频转码失败, ${error_info}`)
         } finally {
             for (let path of local_paths) {
                 await unlinkAsync(path);

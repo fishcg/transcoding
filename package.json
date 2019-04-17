@@ -28,6 +28,7 @@
     "nodemailer-smtp-transport": "^2.7.4",
     "ramda": "^0.25.0",
     "raw-body": "^2.3.3",
+    "request": "^2.88.0",
     "socket.io": "^2.1.1",
     "socket.io-client": "^2.1.1",
     "validator": "^10.9.0",
